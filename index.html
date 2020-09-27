@@ -29,31 +29,23 @@
         box-shadow: -1px 4px 20px -6px rgba(0, 0, 0, 0.2);
       }
 
-      header {
-        display: grid;
-        justify-content: center;
-      }
-
-      .left__top {
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid lightgray;
-      }
-
       h1 {
         font-family: consolas;
         font-weight: 400;
         letter-spacing: 3px;
       }
 
-      #sec__body {
-        display: flex;
-      }
-
       .left__sec {
         flex: 0.5;
         padding: 20px;
+      }
+
+      .left__top {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 1px solid lightgray;
       }
 
       #table__div {
@@ -101,10 +93,9 @@
         display: flex;
         justify-content: space-around;
         align-items: center;
-        flex-wrap: wrap;
       }
 
-      .right__top input {
+      input {
         padding: 12px 20px 12px 10px;
         border: 1px solid #ddd;
         border-radius: 10px;
@@ -147,13 +138,12 @@
 
       <div class="left__sec">
         <div class="left__top">
-          <p>
+          <span>
             Display a list of the stored POSTS
-          </p>
+          </span>
         </div>
         <div id="table__div">
           <table id="table">
-
           </table>
         </div>
       </div>
@@ -202,12 +192,12 @@
         posts = await getPosts();
         users = await getUsers();
         let table = '';
-        posts.forEach(posts => {
+        posts.forEach(post => {
           let td = `<tr>
-            <td>${posts.userId}</td>
-            <td>${posts.id}</td>
-            <td>${posts.title}</td>
-            <td>${posts.completed}</td>
+            <td>${post.userId}</td>
+            <td>${post.id}</td>
+            <td>${post.title}</td>
+            <td>${post.completed}</td>
             </tr>`;
           table += td;
         });
@@ -229,15 +219,6 @@
         renderPosts();
       }
 
-      async function getUid(uname) {
-
-        users.forEach(user => {
-          if (user.username.toUpperCase() === (uname)) {
-            return user.id;
-          }
-        })
-      }
-
       function highlightbytitle() {
         let title = document.getElementById("title").value.toUpperCase().trim();
 
@@ -247,13 +228,10 @@
           td = tr[i].getElementsByTagName("td")[2];
           if (td) {
             txtValue = td.textContent || td.innerText;
-            if (td) {
-              txtValue = td.textContent || td.innerText;
-              if (title && txtValue.toUpperCase().indexOf(title) > -1) {
-                tr[i].style.backgroundColor = "green";
-              } else {
-                tr[i].style.backgroundColor = "";
-              }
+            if (title && txtValue.toUpperCase().indexOf(title) > -1) {
+              tr[i].style.backgroundColor = "green";
+            } else {
+              tr[i].style.backgroundColor = "";
             }
           }
         }
@@ -274,14 +252,10 @@
           td = tr[i].getElementsByTagName("td")[0];
           if (td) {
             txtValue = td.textContent || td.innerText;
-            if (td) {
-              txtValue = td.textContent || td.innerText;
-              if (uid && txtValue.toString() === uid.toString()) {
-                console.log(txtValue);
-                tr[i].style.backgroundColor = "green";
-              } else {
-                tr[i].style.backgroundColor = "";
-              }
+            if (uid && txtValue.toString() === uid.toString()) {
+              tr[i].style.backgroundColor = "green";
+            } else {
+              tr[i].style.backgroundColor = "";
             }
           }
         }
