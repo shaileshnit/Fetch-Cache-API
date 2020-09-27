@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch And Cache API</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        background-color: #dadbd3;
+        height: 100vh;
+      }
+
+      #app__body {
+        display: flex;
+        background-color: #ffffff;
+        margin-bottom: 10px;
+        height: 93vh;
+        width: 95vw;
+        box-shadow: -1px 4px 20px -6px rgba(0, 0, 0, 0.2);
+      }
+
+      header {
+        display: grid;
+        justify-content: center;
+      }
+
+      .left__top {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid lightgray;
+      }
+
+      h1 {
+        font-family: consolas;
+        font-weight: 400;
+        letter-spacing: 3px;
+      }
+
+      #sec__body {
+        display: flex;
+      }
+
+      .left__sec {
+        flex: 0.5;
+        padding: 20px;
+      }
+
+      #table__div {
+        margin-top: 20px;
+        height: 80vh;
+        width: 100%;
+        overflow: auto;
+        background-color: white;
+      }
+
+      #table {
+        width: 100%;
+        position: relative;
+        border: none;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 0.3rem 0.5rem;
+        text-transform: capitalize;
+        text-align: center;
+      }
+
+      th {
+        background: black;
+        color: white;
+        position: sticky;
+        top: 0;
+      }
+
+      tbody tr:nth-of-type(even) {
+        background-color: rgb(214, 210, 210);
+      }
+
+      .right__sec {
+        display: flex;
+        flex: 0.5;
+        padding: 20px;
+        flex-direction: column;
+      }
+
+      .right__top {
+        padding: 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .right__top input {
+        padding: 12px 20px 12px 10px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+      }
+
+      input:focus {
+        outline: none;
+      }
+
+      @media screen and (max-width: 1500px) {
+        .left__sec {
+          flex: 0.6;
+        }
+
+        .right__sec {
+          flex: 0.4;
+        }
+
+        .right__top {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .right__top input {
+          margin-top: 20px;
+        }
+      }
+    </style>
+
+  </head>
+
+  <body onload="displayPosts()">
+
+    <header>
+      <h1>Fetch And Cache API</h1>
+    </header>
+
+    <div id='app__body'>
+
+      <div class="left__sec">
+        <div class="left__top">
+          <p>
+            Display a list of the stored POSTS
+          </p>
+        </div>
+        <div id="table__div">
+          <table id="table">
+
+          </table>
+        </div>
+      </div>
+
+      <div class="right__sec">
+        <div class="right__top">
+          <span>Search the posts here(eg. title, username)</span>
+          <input type="text" id="title" onkeyup="highlightbytitle()" name="title" placeholder="Search by title...">
+          <input type="text" id="uname" onkeyup="highlightbyuname()" name="uname" placeholder="Search by username...">
+        </div>
+
+      </div>
+
+    </div>
+    <script>
+      let urlPosts = "https://www.cadfolio.uk/it-tests/todosJSON.txt";
+      let urlUsers = "https://www.cadfolio.uk/it-tests/users.txt";
+      let posts, users;
+
+      const urls = [urlPosts, urlUsers];
+      fetch(urlPosts).then(res => {
+        caches.open("Mycache").then(cache => {
+          cache.addAll(urls);
+        })
+      })
+
+      async function getPosts() {
+        try {
+          let res = await fetch(urlPosts);
+          return await res.json();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function getUsers() {
+        try {
+          let res = await fetch(urlUsers);
+          return await res.json();
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function renderPosts() {
+        posts = await getPosts();
+        users = await getUsers();
+        let table = '';
+        posts.forEach(posts => {
+          let td = `<tr>
+            <td>${posts.userId}</td>
+            <td>${posts.id}</td>
+            <td>${posts.title}</td>
+            <td>${posts.completed}</td>
+            </tr>`;
+          table += td;
+        });
+        document.getElementById("table").innerHTML = `
+            <thead><tr>
+              <th>UserId</th>
+              <th>id</th>
+              <th>title</th>
+              <th>completed</th>
+            </tr>
+            </thead>
+            <tbody>
+            ${table}
+            </tbody>`;
+
+      }
+
+      function displayPosts() {
+        renderPosts();
+      }
+
+      async function getUid(uname) {
+
+        users.forEach(user => {
+          if (user.username.toUpperCase() === (uname)) {
+            return user.id;
+          }
+        })
+      }
+
+      function highlightbytitle() {
+        let title = document.getElementById("title").value.toUpperCase().trim();
+
+        let tr = document.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          let txtValue, td;
+          td = tr[i].getElementsByTagName("td")[2];
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (title && txtValue.toUpperCase().indexOf(title) > -1) {
+                tr[i].style.backgroundColor = "green";
+              } else {
+                tr[i].style.backgroundColor = "";
+              }
+            }
+          }
+        }
+      }
+
+      function highlightbyuname() {
+        let uname = document.getElementById("uname").value.toUpperCase().trim();
+        let uid;
+        users.forEach(user => {
+          if (user.username.toUpperCase() === (uname)) {
+            uid = user.id;
+          }
+        })
+
+        let tr = document.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+          let txtValue, td;
+          td = tr[i].getElementsByTagName("td")[0];
+          if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (uid && txtValue.toString() === uid.toString()) {
+                console.log(txtValue);
+                tr[i].style.backgroundColor = "green";
+              } else {
+                tr[i].style.backgroundColor = "";
+              }
+            }
+          }
+        }
+      }
+
+      caches.open("Mycache").then(cache => {
+        cache.keys().then(items => {
+          items.map(item => {
+            cache.delete(item.url).then(() => {
+              console.log("Cache deleted successfully!");
+            })
+          })
+        })
+      })
+    </script>
+  </body>
+
+</html>
